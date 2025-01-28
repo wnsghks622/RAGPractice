@@ -3,7 +3,7 @@ import streamlit as st
 # session states
 ## chat history with initial message
 if "chat_history" not in st.session_state:
-    st.session_state.chat_history = [{"user": "bot", "text": "Hello, how can I help you?"}]
+    st.session_state.chat_history = [{"role": "bot", "content": "Hello, how can I help you?"}]
     
 ## Store current query (i.e., last user input)
 if "current_query" not in st.session_state:
