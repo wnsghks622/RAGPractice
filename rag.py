@@ -20,18 +20,28 @@ from langchain.prompts import ChatPromptTemplate
 # for building a simple chain
 from langchain.chains import LLMChain
 # Gemini
-from langchain_google_vertexai import ChatVertexAI
+#from langchain_google_vertexai import ChatVertexAI
 
 import os
 import streamlit as st
 
 os.environ['OPENAI_API_KEY'] = st.secrets["OPENAI_API_KEY"]
 os.environ['GOOGLE_API_KEY'] = st.secrets["GEMINI_API_KEY"]
+os.environ['HUGGINGFACEHUB_API_TOKEN'] = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
+
+def format_docs(docs):
+    '''
+    format chunks into documents to pass as context
+    '''
+    return "\n\n".join(doc.page_content for doc in docs)
 
 def load_docs():
     loader = PyPDFDirectoryLoader("PDF_docs/")
     knowledge_base = loader.load()
     return knowledge_base
+
+def build_chat_history(message_history):
+    return "\n".join([f"{msg['role']}: {msg['content']}" for msg in message_history])
 
 def chunk_docs(docs):
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000,
@@ -67,7 +77,7 @@ def init_retriever(rerank: bool):
                                                                base_retriever=retriever)
         return compression_retriever
          
-    return retrieverp
+    return retriever
 
 def build_rag_chain(provider: str):
     
@@ -87,8 +97,8 @@ def build_rag_chain(provider: str):
                                 "repetition_penalty": 1.03,
                              },
                              )
-    elif provider == "gemini":
-        llm = ChatVertexAI(model="gemini-1.5-flash")
+    # elif provider == "gemini":
+    #     llm = ChatVertexAI(model="gemini-1.5-flash")
             
     # design prompt
     ## the system prompt will tell the LLM how to act and how to use the context retrieved
@@ -109,7 +119,7 @@ def build_rag_chain(provider: str):
 def run_rag_chain(chat_messages,
                   user_query):
     # initialize the RAG chain
-    rag_chain = build_rag_chain(provider = "gemini")
+    rag_chain = build_rag_chain(provider = "huggingface")
     
     # initialize the retriever and get context
     retriever = init_retriever(rerank=False)
