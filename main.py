@@ -1,4 +1,5 @@
 import streamlit as st
+from rag import *
 
 # session states
 ## chat history with initial message
@@ -25,13 +26,27 @@ def run_chatui():
             st.write(prompt)
             st.session_state.current_query = prompt
 
+
+    # # Generate a new response if last message is not from bot
+    # if st.session_state.chat_history[-1]["role"] != "bot":
+    #     with st.chat_message("RAG bot"):
+    #         with st.spinner("Thinking..."):
+    #             # We'll have it repeat us for now, like a baby bot. 
+    #             # Here is where the LLM response would go. 
+    #             answer = st.session_state.current_query
+    #             st.write("🤖: " + answer)
+            
+    #     message = {"role": "bot", "content": answer}
+    #     st.session_state.chat_history.append(message)
+
     # Generate a new response if last message is not from bot
     if st.session_state.chat_history[-1]["role"] != "bot":
         with st.chat_message("RAG bot"):
             with st.spinner("Thinking..."):
                 # We'll have it repeat us for now, like a baby bot. 
                 # Here is where the LLM response would go. 
-                answer = st.session_state.current_query
+                answer = run_rag_chain(chat_messages = st.session_state.chat_history,
+                                        user_query = st.session_state.current_query)
                 st.write("🤖: " + answer)
             
         message = {"role": "bot", "content": answer}
